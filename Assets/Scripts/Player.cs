@@ -19,30 +19,35 @@ public class Player : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
     Vector3 cameraDirection = this.playerCamera.transform.forward;
- 
+    Vector3 cameraRight = this.playerCamera.transform.right;
+
     // == player.forward
-    Vector3 planarDirection = new Vector3(cameraDirection.x, 0, cameraDirection.z).normalized;
+    Vector3 depthDirection = ToPlanarVector(cameraDirection);
+    // == player.right
+    Vector3 lateralDirection = ToPlanarVector(cameraRight);
 
-    Quaternion planarDirectionRight = Quaternion.Euler(planarDirection) * Quaternion.Euler(0, 90, 0);
-    Vector3 pdrAsVec3 = planarDirectionRight.eulerAngles.normalized;
+    Debug.DrawRay(transform.position, depthDirection, Color.green);
+    Debug.DrawRay(transform.position, lateralDirection, Color.blue);
 
-    Debug.Log(planarDirection);
-    Debug.Log(planarDirectionRight);
+    float depthInput = Input.GetAxis("Vertical");
+    float lateralInput = Input.GetAxis("Horizontal");
 
-    Debug.DrawRay(transform.position, planarDirection, Color.green);
-    Debug.DrawRay(transform.position, pdrAsVec3, Color.blue);
-
-    float depthInput = Input.GetAxis("Horizontal");
-    float lateralInput = Input.GetAxis("Vertical");
+    Debug.Log(depthInput);
+    Debug.Log(lateralInput);
 
     float dDepth = depthInput * speed;
     float dLateral = lateralInput * speed;
 
-    Vector3 depthForce = dDepth * planarDirection;
-    Vector3 lateralForce = dLateral * pdrAsVec3;
+    Vector3 depthForce = dDepth * depthDirection;
+    Vector3 lateralForce = dLateral * lateralDirection;
 
     rb.AddForce(depthForce + lateralForce);
 	}
+
+  private Vector3 ToPlanarVector(Vector3 vector)
+  {
+    return new Vector3(vector.x, 0, vector.z);
+  }
 
   private void computeInputs (float dx, float dy)
   {
